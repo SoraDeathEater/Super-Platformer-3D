@@ -1,3 +1,5 @@
+using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class characterMovement : MonoBehaviour
@@ -8,29 +10,45 @@ public class characterMovement : MonoBehaviour
     [SerializeField] float jumpForce = 1;
     [SerializeField] float gravity = 1;
 
+    // Camera
     [SerializeField] Transform myCamera;
 
+    // Animation
     [SerializeField] Animator myAnimator;
 
+    // Controller - Controls
     CharacterController controller;
     Vector3 movement;
 
     bool grounded;
-    
+
+    // Player Stats
+    [SerializeField] PLayerStats myStats;
+
+
     void Start()
     {
         // Setting up Controller Variable at Start of Area
         controller = GetComponent<CharacterController>();
+
+        // Resets the Character Health
+        myStats.health = 10;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Player Stat's
+        speed = myStats.moveSpeed;
+        jumpForce = myStats.jumpForce;
+        gravity = myStats.gravity;
+
+
         // PLayer Input
         float xInput = Input.GetAxis("Horizontal");
         float yInput = Input.GetAxis("Vertical");
 
-        if(xInput != 0 || yInput != 0)
+        if (xInput != 0 || yInput != 0)
         {
             myAnimator.SetBool("IsRunning", true);
         }
@@ -40,8 +58,8 @@ public class characterMovement : MonoBehaviour
         }
 
 
-            // Camera Angle
-            Vector3 camForward = myCamera.forward;
+        // Camera Angle
+        Vector3 camForward = myCamera.forward;
         Vector3 camRight = myCamera.right;
 
         camForward.y = 0;
@@ -79,14 +97,22 @@ public class characterMovement : MonoBehaviour
 
 
         // Character Jumping
-        if(Input.GetButtonDown("Jump") && grounded) //Doesn't need to have the == true to be true. It'll automatically be true. 
+        if (Input.GetButtonDown("Jump") && grounded) //Doesn't need to have the == true to be true. It'll automatically be true. 
         {
             movement.y = jumpForce;
             myAnimator.SetTrigger("jump");
         }
         controller.Move(movement * Time.deltaTime);
-
-        
-
     }
+
+        private void OnTriggerEnter(Collider collision)
+        {
+                if (collision.GetComponent<Goal>())
+                {
+                    SceneManager.LoadScene("endScene");
+                }
+             
+        }
+
+    
 }
